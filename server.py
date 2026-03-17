@@ -49,6 +49,7 @@ class GameState:
             }
             print(f"Player {addr_str} added.")
 
+    def remove_player(self, addr_str):
         with self.lock:
             if addr_str in self.players:
                 # Reclaim color
@@ -189,7 +190,7 @@ def main():
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
     
     try:
-        server.bind((config.SERVER_HOST, config.SERVER_PORT))
+        server.bind(('0.0.0.0', config.SERVER_PORT))
         server.listen()
         print(f"Server listening on {config.SERVER_HOST}:{config.SERVER_PORT} for controllers...")
         
@@ -199,6 +200,8 @@ def main():
                 try:
                     conn, addr = server.accept()
                     threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
+                except OSError:
+                    break
                 except Exception as e:
                     print(f"Accept error: {e}")
                     break
